@@ -1,16 +1,18 @@
 TODO:
 1. Collect cricket sounds (various accepted frequency and beats within the cricket
 mating "range")
-2. Define continuous control for agent based on steering angle
-3. Make cricket up to scale. Maybe environment in 100x100 cm grid? (cricket 2.54cm).
+        -> done
+2. Create simulation master class
+3. Define continuous control for agent based on steering angle
+4. Make cricket up to scale. Maybe environment in 100x100cm grid? (cricket 2.54cm).
 How big the step towards sound?
-4. Run simulations with model to tune environemnt (path sound be less than 2 times 
+5. Run simulations with model to tune environemnt (path sound be less than 2 times 
 lenghts of the distance)
-5. Run 10 final vanilla simulations to show the movement of the agent
-6. Introduce memory in the directional movement (short-time). Set a time scale for the
+6. Run 10 final vanilla simulations to show the movement of the agent
+7. Introduce memory in the directional movement (short-time). Set a time scale for the
 movement. Rerun 10 simulations. Any differences?
-7. Introduce slightly longer term memory (30 minutes). Rerun 10 simulations. Any differences?
-8. Given two male crickets, can you obvserve any differences with memory?
+8. Introduce slightly longer term memory (30 minutes). Rerun 10 simulations. Any differences?
+9. Given two male crickets, can you obvserve any differences with memory?
 
 
 Literature Review

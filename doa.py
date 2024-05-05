@@ -30,7 +30,7 @@ class Doa():
         C: float, speed of sound
     """
 
-    def __init__(self, room_dimensions, source_loc, centre_mic):
+    def __init__(self, room_dimensions, source_loc, centre_mic, snr=0):
         self.room = None
         self.microphones = None
         self.centre_mic = centre_mic
@@ -47,7 +47,7 @@ class Doa():
         for source in self.source_loc:
             self.room.add_source(source, signal=signal)
 
-        self.microphones = np.c_[[self.centre_mic[0]-0.1, self.centre_mic[1]], 
+        self.microphones = np.c_[[self.centre_mic[0]-0.1, self.centre_mic[1]],
                                  [self.centre_mic[0]+0.1, self.centre_mic[1]]]
         self.room.add_microphone_array(self.microphones)
 
@@ -67,8 +67,8 @@ class DoaCNN(Doa):
         model: keras model object; has already been trained on 180 degrees of azimuth predictions
     """
 
-    def __init__(self, room_dimensions, source_loc, centre_mic):
-        super().__init__(room_dimensions, source_loc, centre_mic)
+    def __init__(self, room_dimensions, source_loc, centre_mic, snr=0):
+        super().__init__(room_dimensions, source_loc, centre_mic, snr)
         self.model_name = "CNN"
         self.model = load_model('./saved_model')
 
@@ -179,8 +179,8 @@ class DoaMUSIC(Doa):
 
     Performs the sound signal transformation using Short-Time Fourier Transform (STFT)
     """
-    def __init__(self, room_dimensions, source_loc, centre_mic):
-        super().__init__(room_dimensions, source_loc, centre_mic)
+    def __init__(self, room_dimensions, source_loc, centre_mic, snr=0):
+        super().__init__(room_dimensions, source_loc, centre_mic, snr)
         self.model_name = "MUSIC"
 
     def get_prediction(self):
