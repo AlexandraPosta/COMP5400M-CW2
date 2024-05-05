@@ -2,9 +2,6 @@ import math
 import numpy as np
 import sys
 
-# Assume DoaCNN is properly imported from the specified path
-path_to_parent = 'c:/Users/Alex/source/repos/COMP5400M-CW2'
-sys.path.insert(0, path_to_parent)
 from doa import DoaCNN
 
 class CricketAgent:
