@@ -1,11 +1,10 @@
 TODO:
 1. Collect cricket sounds (various accepted frequency and beats within the cricket
-mating "range")
-        -> done
-2. Create simulation master class
-3. Define continuous control for agent based on steering angle
-4. Make cricket up to scale. Maybe environment in 100x100cm grid? (cricket 2.54cm).
-How big the step towards sound?
+mating "range") [DONE]
+2. Create simulation master class [DONE]
+3. Make cricket up to scale. Maybe environment in 100x100cm grid? (cricket 2.54cm).
+How big the step towards sound? [DONE]
+4. Define continuous control for agent based on steering angle [PROGRESS]
 5. Run simulations with model to tune environemnt (path sound be less than 2 times 
 lenghts of the distance)
 6. Run 10 final vanilla simulations to show the movement of the agent
