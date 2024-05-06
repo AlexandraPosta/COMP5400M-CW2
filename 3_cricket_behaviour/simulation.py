@@ -1,13 +1,16 @@
+import os
+
 from scipy.io import wavfile
 from matplotlib import pyplot as plt, patches
 from matplotlib.lines import Line2D
 from matplotlib.animation import FuncAnimation
 
 class CricketSimulation:
-    def __init__(self, agent, agent_location, environment, audio_path):
+    def __init__(self, agent, agent_location, environment, audio_path, output_path):
         self.agent = agent
         self.environment = environment
         self.audio_path = audio_path
+        self.output_path = output_path
         self.agent_location = agent_location
         plt.rcParams.update({'figure.figsize': [6,6], 'figure.autolayout': True, 'font.size': 12})
         self.fig, self.ax = plt.subplots()
@@ -24,24 +27,25 @@ class CricketSimulation:
         for patch in self.source_patches:
             self.ax.add_patch(patch)
         # Include custom legend
-        legend_elements = [Line2D([0], [0], marker='o', lw=2, color='green', label='Sound Source'),\
-                           Line2D([0], [0], marker='o', lw=2, color="black", label='Cricket')]
+        legend_elements = [Line2D([0], [0], marker='o', lw=0, color='green', label='Sound Source'),\
+                           Line2D([0], [0], marker='o', lw=0, color='black', label='Cricket')]
         self.ax.legend(handles=legend_elements, loc='upper left')
         self.trail_patches = self.ax.add_patch(patches.Circle((self.agent_location), radius=dims[0]/300, facecolor='black'))
 
     def update(self, frames):
         if self.agent.mate:
+            self.fig.savefig(self.output_path)
             return
         source = self.environment.get_source_locations()
         dims = self.environment.get_room_dimensions()
         # Get updates and draw the new positions
-        if (source[0][0]-0.5 < self.agent_location[0] < source[0][0]+0.5 and
-            source[0][1]-0.3 < self.agent_location[1] < source[0][1]+0.5):
+        if (source[0][0]-0.3 < self.agent_location[0] < source[0][0]+0.3 and
+            source[0][1]-0.3 < self.agent_location[1] < source[0][1]+0.3):
             self.agent.mate = True
         elif (self.agent_location[0] > dims[0]):
             self.agent.mate = True
         else:
-            self.agent_location = self.agent.move(self.agent_location, dims, source, self.signal, 0.1)
+            self.agent_location = self.agent.move(self.agent_location, dims, source, self.signal)
             new_patch = patches.Circle((self.agent_location), radius=dims[0]/300, facecolor='black')
             self.ax.add_patch(new_patch)
             self.trail_patches.append(new_patch)

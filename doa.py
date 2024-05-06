@@ -37,14 +37,14 @@ class Doa():
         self.source_loc = source_loc
         self.distance_mic = distance_mic
         self.fs = 16000
-        self.snr = 0
+        self.snr = snr
         self.room_dimension = room_dimensions
         self.nfft = 256
         self.c = 343.
 
     def get_room(self, signal):
         """ Simulate the room with the given signal and source locations """
-        self.room = pra.ShoeBox(self.room_dimension, fs=self.fs, max_order=0)
+        self.room = pra.ShoeBox(self.room_dimension, fs=self.fs, max_order=3, ray_tracing=True)
         for source in self.source_loc:
             self.room.add_source(source, signal=signal)
 
