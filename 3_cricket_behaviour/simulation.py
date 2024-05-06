@@ -35,6 +35,8 @@ class CricketSimulation:
     def update(self, frames):
         if self.agent.mate:
             self.fig.savefig(self.output_path)
+            self.anim.event_source.stop()
+            plt.close(self.fig)
             return
         source = self.environment.get_source_locations()
         dims = self.environment.get_room_dimensions()
@@ -42,7 +44,7 @@ class CricketSimulation:
         if (source[0][0]-0.3 < self.agent_location[0] < source[0][0]+0.3 and
             source[0][1]-0.3 < self.agent_location[1] < source[0][1]+0.3):
             self.agent.mate = True
-        elif (self.agent_location[0] > dims[0]):
+        elif (self.agent_location[1] > dims[1]):
             self.agent.mate = True
         else:
             self.agent_location = self.agent.move(self.agent_location, dims, source, self.signal)
