@@ -31,22 +31,26 @@ def main():
     room_dim = [10.0, 10.0]
     agent_location = [room_dim[0] / 2, 1, 0]
     source_loc = [[3, 3]]
-    i = 1
+    i = 0
 
-    while i < 16:
+    while i < 1:
         # Simulation variables
         audio_path = "./sound_data/cricket.wav"
 
         # Agent and Simulation
-        _agent = CricketAgent(agent_location, speed=2.0)
-        _source = Speaker(source_loc[0])
         _environment = CricketEnvironment(room_dim)
+        _agent = CricketAgent(agent_location, speed=1.0)
+        _agent_2 = CricketAgent()
+        _environment.add_agent(_agent)
+        _environment.add_agent(_agent_2)
+        _source = Speaker(source_loc[0])
         _environment.add_source(_source)
-        simulation = CricketSimulation(_agent, _environment, audio_path)
+        simulation = CricketSimulation(_environment, audio_path)
+        simulation.play_simulation()
 
-        p = Process(target=simulation.play_simulation())
-        p.start()
-        p.join()
+        # p = Process(target=simulation.play_simulation())
+        # p.start()
+        # p.join()
 
         i += 1
 
