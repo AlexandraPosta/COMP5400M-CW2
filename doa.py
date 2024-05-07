@@ -77,11 +77,15 @@ class DoaCNN(Doa):
     """
 
     def __init__(
-        self, room_dimensions, source_loc, centre_mic, distance_mic=0.1, snr=0
+        self, room_dimensions, source_loc, centre_mic, distance_mic=0.1, snr=0, h5=None
     ):
         super().__init__(room_dimensions, source_loc, centre_mic, distance_mic, snr)
         self.model_name = "CNN"
-        self.model = load_model("./saved_model")
+
+        if h5 is None:
+            self.model = load_model("./saved_model")
+        else:
+            self.model = load_model("./saved_model/saved_model_h5")
 
     def gcc_phat(self, x_1, x_2, fs=16000, interp=1):
         """Compute the GCC-PHAT between two signals"""
