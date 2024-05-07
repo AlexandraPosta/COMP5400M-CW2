@@ -29,7 +29,6 @@ class Speaker:
             self.position = (self.position[0], 10)
 
         self.__change_direction()
-
         return self.position
 
     def __change_direction(self):
