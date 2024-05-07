@@ -7,10 +7,12 @@ How big the step towards sound? [DONE]
 4. Define continuous control for agent based on steering angle [DONE]
 5. Run simulations with model to tune environemnt (path sound be less than 2 times 
 lenghts of the distance) [DONE]
-6. Run 5 final vanilla simulations to show the movement of the agent [IN PROGRESS]
+6. Run 5 final vanilla simulations to show the movement of the agent [DONE]
 7. Introduce memory in the directional movement (short-time). Set a time scale for the
-movement. Rerun 10 simulations. Any differences?
-8. Introduce slightly longer term memory (30 minutes). Rerun 10 simulations. Any differences?
+movement. Rerun 5 simulations. Any differences? (one step every 3.5s -> 10 steps -> 
+about 35 seconds memory) [IN PROGRESS]
+8. Introduce slightly longer term memory (30 minutes). (one step every 3.5s -> 30 
+minutes -> can remember about 514 steps). Rerun 5 simulations. Any differences?
 9. Given two male crickets, can you obvserve any differences with memory?
 
 
