@@ -30,7 +30,7 @@ K = np.array([[(k + k_3), k_3], [k_3, (k + k_3)]])
 
 def external_force(t):
     frequency = 5000
-    amplitude = 1.0*(10**(-10))
+    amplitude = 1.0*(10**(-8))
     if t <= 0.5:
         return amplitude * np.sin(2 * np.pi * frequency * t)
     else:
@@ -38,14 +38,14 @@ def external_force(t):
 
 def external_force_shifted(t):
     frequency = 5000
-    amplitude = 1.0*(10**(-10))
+    amplitude = 1.0*(10**(-8))
     time_delay = 1.2*(10**(-3))*np.sin(45*np.pi/180)/344
     if t <= 0.5 + time_delay:
         return amplitude * np.sin(2 * np.pi * frequency * (t - time_delay))
     else:
         return 0
 
-t = np.linspace(0, 1, 1000000) #100 time steps from 0 to 10
+t = np.linspace(0, 1, 1600000) #1,600,000 time steps from 0 to 1
 
 #Simulated sine waves arriving at different times.
 #Use actual microphone data as input here
