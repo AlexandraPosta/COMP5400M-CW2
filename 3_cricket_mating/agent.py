@@ -1,7 +1,5 @@
 import math
 import numpy as np
-import sys
-
 from doa import DoaCNN
 
 class CricketAgent:
