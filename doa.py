@@ -13,6 +13,7 @@ from pyroomacoustics.utilities import normalize
 import pyroomacoustics as pra
 from keras.models import load_model
 from sklearn.preprocessing import OneHotEncoder
+from ormia_func import ormia_transformation, ormia_prediction
 
 
 class Doa:
@@ -212,6 +213,42 @@ class DoaMUSIC(Doa):
         pred = doa.azimuth_recon
 
         # If the azimuth is larger than pi, then we need to take the complement
+        if pred > np.pi:
+            pred = 2 * np.pi - pred
+        pred = math.degrees(pred)
+
+        # Convert the prediction to degrees
+        return pred
+
+class DoaORMIA(Doa):
+    """Class to predict the doa of the sound source using the Ormia Ochracea auditory model
+
+    Performs the sound signal transformation using a mechanical spring/damper simulation
+    """
+
+    def __init__(
+        self, room_dimensions, source_loc, centre_mic, distance_mic=0.1, snr=0
+    ):
+        super().__init__(room_dimensions, source_loc, centre_mic, distance_mic, snr)
+        self.model_name = "ORMIA"
+
+    def get_prediction(self):
+        #NOTE: THIS DOES NOT WORK YET, NEED TO FIX TIME VALUES, DISTANCES, ETC.
+
+        """Get the prediction of the sound source direction of arrival of the ORMIA algorithm
+        Output is float; predicted angle in degrees from 0 to 180"""
+        # Perform the STFT on the signals from the room simulation
+        x = ormia_transformation(self.room.mic_array.signals.T)
+        print("x: ")
+        print(x)
+
+        pred = ormia_prediction(x)
+        print("pred: ")
+        print(pred)
+
+        pred=0
+
+        # If the prediction is larger than pi, then we need to take the complement
         if pred > np.pi:
             pred = 2 * np.pi - pred
         pred = math.degrees(pred)
