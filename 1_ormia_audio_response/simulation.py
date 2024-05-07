@@ -5,7 +5,6 @@ from matplotlib.lines import Line2D
 from matplotlib.animation import FuncAnimation
 
 class CricketSimulation:
-    def __init__(self, agent, agent_location, environment, audio_path):
     def __init__(self, agent, agent_location, environment, audio_path, output_path):
         self.agent = agent
         self.environment = environment
@@ -27,8 +26,8 @@ class CricketSimulation:
         for patch in self.source_patches:
             self.ax.add_patch(patch)
         # Include custom legend
-        legend_elements = [Line2D([0], [0], marker='o', lw=2, color='green', label='Sound Source'),\
-                           Line2D([0], [0], marker='o', lw=2, color="black", label='Cricket')]
+        legend_elements = [Line2D([0], [0], marker='o', lw=2, color='green', label='Cricket'),\
+                           Line2D([0], [0], marker='o', lw=2, color="black", label='Ormia Ochracea')]
         self.ax.legend(handles=legend_elements, loc='upper left')
         self.trail_patches = self.ax.add_patch(patches.Circle((self.agent_location), radius=dims[0]/300, facecolor='black'))
 

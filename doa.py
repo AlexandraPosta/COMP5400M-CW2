@@ -211,6 +211,45 @@ class DoaMUSIC(Doa):
         doa = pra.doa.MUSIC(self.microphones, self.fs, self.nfft, c=self.c, num_src=1)
         doa.locate_sources(x)
         pred = doa.azimuth_recon
+        print(pred)
+        # If the azimuth is larger than pi, then we need to take the complement
+        if pred > np.pi:
+            pred = 2 * np.pi - pred
+        print(pred)
+        pred = math.degrees(pred)
+
+        # Convert the prediction to degrees
+        return pred
+
+class DoaORMIA_MUSIC(Doa):
+    """Class to predict the doa of the sound source using the MUSIC algorithm
+
+    Performs the sound signal transformation using Short-Time Fourier Transform (STFT)
+    """
+
+    def __init__(
+        self, room_dimensions, source_loc, centre_mic, distance_mic=0.001, snr=0
+    ):
+        super().__init__(room_dimensions, source_loc, centre_mic, distance_mic, snr)
+        self.model_name = "ORMIA_MUSIC"
+
+    def get_prediction(self):
+        """Get the prediction of the sound source direction of arrival of the MUSIC algorithm
+        Output is float; predicted angle in degrees from 0 to 180"""
+        # Perform the STFT on the signals from the room simulation
+
+        
+        ormia_pos = DoaORMIA.ormia_transformation(DoaORMIA, self.room.mic_array.signals.T)
+        x = pra.transform.stft.analysis(
+            ormia_pos[::100], self.nfft, self.nfft // 2
+        )
+        x = x.transpose([2, 1, 0])
+
+        # Construct the new DOA object and perform localisation on the frames in X
+        doa = pra.doa.MUSIC(self.microphones, self.fs/100, self.nfft, c=self.c, num_src=1)
+        
+        doa.locate_sources(x)
+        pred = doa.azimuth_recon
 
         # If the azimuth is larger than pi, then we need to take the complement
         if pred > np.pi:
@@ -227,7 +266,7 @@ class DoaORMIA(Doa):
     """
 
     def __init__(
-        self, room_dimensions, source_loc, centre_mic, distance_mic=0.1, snr=0
+        self, room_dimensions, source_loc, centre_mic, distance_mic=0.001, snr=0
     ):
         super().__init__(room_dimensions, source_loc, centre_mic, distance_mic, snr)
         self.model_name = "ORMIA"
@@ -306,3 +345,5 @@ class DoaORMIA(Doa):
 
         # Convert the prediction to degrees
         return pred
+
+

@@ -2,7 +2,7 @@ import math
 import numpy as np
 import sys
 
-from doa import DoaCNN, DoaMUSIC, DoaORMIA
+from doa import DoaCNN, DoaMUSIC, DoaORMIA, DoaORMIA_MUSIC
 
 class CricketAgent:
     def __init__(self):
@@ -10,11 +10,11 @@ class CricketAgent:
         self.auditory_sense = None
 
     def sense(self, position, room_dim, sound_sources, signal, snr):
-        self.auditory_sense = DoaMUSIC(room_dim, sound_sources, position, snr)
+        self.auditory_sense = DoaORMIA_MUSIC(room_dim, sound_sources, position, snr)
         self.auditory_sense.get_room(signal)
         pred = self.auditory_sense.get_prediction()
-        pred_degree = max(set(pred), key=pred.count)
-        return math.pi - pred_degree * math.pi / 180
+        #pred_degree = max(set(pred), key=pred.count)
+        return math.pi - pred * math.pi / 180
 
     def move(self, location, room_dim, sound_sources, signal, snr):
         direction = self.sense(location, room_dim, sound_sources, signal, snr)
