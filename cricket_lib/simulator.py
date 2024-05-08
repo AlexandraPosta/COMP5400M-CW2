@@ -3,15 +3,17 @@ import sys
 
 from scipy.io import wavfile
 from matplotlib import pyplot as plt, patches
+from matplotlib.lines import Line2D
 from matplotlib.animation import FuncAnimation
 import concurrent.futures
+import numpy as np
 
 from .environment import CricketEnvironment
 
 
 class CricketSimulation:
     def __init__(
-        self, environment: CricketEnvironment, audio_path: str, destination_path: str
+        self, environment: CricketEnvironment, audio_paths: str, destination_path: str
     ):
         """
         Initialize the simulation
@@ -23,14 +25,14 @@ class CricketSimulation:
         """
 
         self.environment: CricketEnvironment = environment
-        self.audio_path = audio_path
+        self.audio_paths = audio_paths
         plt.rcParams.update(
             {"figure.figsize": [6, 6], "figure.autolayout": True, "font.size": 12}
         )
         self.fig, self.ax = plt.subplots()
         self.setup_room()
         self.setup_export_paths(destination_path)
-        self.signal = None  # To be initialised in play_simulation
+        self.signal = []  # To be initialised in play_simulation
         self.trail_patches = []  # List to hold the patches for the trails
         self.anim = None  # Initialize animation variable
 
@@ -76,8 +78,9 @@ class CricketSimulation:
         """
         Play the simulation
         """
-
-        fs, self.signal = wavfile.read(self.audio_path)
+        for i in range (0,len(self.audio_paths)):
+            fs, sound_signal = wavfile.read(self.audio_paths[i])
+            self.signal.append(sound_signal)
         self.anim = FuncAnimation(
             self.fig, self.update, frames=None, repeat=False, blit=False
         )
@@ -129,6 +132,11 @@ class CricketSimulation:
         for patch in self.trail_patches:
             self.ax.add_patch(patch)
 
+        # Include custom legend
+        legend_elements = [Line2D([0], [0], marker='o', lw=0, color='green', label='Sound Source'),\
+                           Line2D([0], [0], marker='o', lw=0, color='black', label='Cricket')]
+        self.ax.legend(handles=legend_elements, loc='upper left')
+
     def setup_export_paths(self, destination_path: str) -> None:
         """
         Setup the paths for exporting the gif and png files
@@ -137,7 +145,8 @@ class CricketSimulation:
             destination_path (str): The folder to save the files to
 
         The files are named as "output_gif_0.gif", "output_gif_1.gif", etc.
-        or "output_png_0.png", "output_png_1.png", etc. and will be saved in the "output" folder in the parent directory of the current path
+        or "output_png_0.png", "output_png_1.png", etc. and will be saved in 
+        the "output" folder, in the parent directory of the current path
         """
 
         # Get the path of where the execution is happening

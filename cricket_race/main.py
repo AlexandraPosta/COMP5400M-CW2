@@ -35,7 +35,7 @@ def main():
         _source = speaker.Speaker()
         _environment.add_source(_source)
         simulation = simulator.CricketSimulation(
-            _environment, audio_path, "../cricket_race/"
+            _environment, [audio_path], "../cricket_race/"
         )
         simulation.play_simulation()
         i += 1

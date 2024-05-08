@@ -1,8 +1,10 @@
 import math
 from typing import List, Tuple
 import numpy as np
+from typing import List, Dict
+from collections import Counter
 
-from .doa import DoaCNN
+from .doa import DoaCNN, DoaMUSIC, DoaORMIA_CNN, DoaORMIA_MUSIC, DoaORMIA
 
 
 class CricketAgent:
@@ -247,48 +249,119 @@ class CricketAgentEnhanced(CricketAgent):
 
 
 class CricketAgentMemory(CricketAgent):
+
     def __init__(
         self,
-        memory_size: int = 8,
-        position=[np.random.uniform(0.5, 9.5), np.random.uniform(0.5, 20 / 3 - 0.5), 0],
+        position: List[float] = None,
         speed: float = 1.0,
+        available_space: List[float] = [10.0, 10.0],
+        memory_size: int = 10,
+        decay_rate: float = 0.9,
+        learning_rate: float = 0.01,  # Learning rate for adaptation
     ):
-        super().__init__(position=position, speed=speed)
-        self.angle_memory: List[List[float]] = (
+        super().__init__(
+            position=position, speed=speed, available_space=available_space
+        )
+        self.memory_size = memory_size
+        self.decay_rate = decay_rate
+        self.learning_rate = learning_rate
+        self.angle_memory: List[Dict[float, float]] = (
             []
-        )  # Memory to store recent angle distributions
-        self.memory_size: int = memory_size  # How many recent distributions to remember
+        )  # Storing angle and probabilities
+        self.adaptation_factor = 0.01  # Initial adaptation factor
+
+    def sense(
+        self,
+        position: List[float],
+        room_dim: List[float],
+        sound_sources: List[List[float]],
+        signal: np.array,
+    ) -> float:
+
+        self.auditory_sense = DoaCNN(
+            room_dim, sound_sources, position, self.distance_mic, self.snr
+        )
+        self.auditory_sense.get_room(signal)
+        angles = self.auditory_sense.get_prediction()
+        angle_counts = Counter(angles)  # Count occurrence of each angle
+        total_angles = len(angles)
+
+        # Create a dictionary of all angles from 0 to 180 with zero probability
+        angle_probabilities = {angle: 0 for angle in range(0, 181, 10)}
+
+        # Update the dictionary with actual probabilities from predictions
+        for angle, count in angle_counts.items():
+            if angle in angle_probabilities:
+                angle_probabilities[angle] = count / total_angles
+        return angle_probabilities
 
     def move(
         self, room_dim: List[float], sound_sources: List[List[float]], signal: np.array
     ) -> None:
+
         if self.mate:
             return
 
-        current_distribution = self.sense(
+        current_probabilities = self.sense(
             self.position, room_dim, sound_sources, signal
         )
-        self.angle_memory.append(current_distribution)
+        self.angle_memory.append(current_probabilities)
+        self.angle_memory = self.angle_memory[-self.memory_size :]
 
-        # Maintain memory size
-        if len(self.angle_memory) > self.memory_size:
-            self.angle_memory.pop(0)
+        # Calculate the new direction with weighted average
+        weighted_direction = self.calculate_weighted_direction()
 
-        # Combine distributions from memory to form a single distribution
-        combined_distribution = self.combine_distributions(self.angle_memory)
+        # Update adaptation factor based on recent movement success
+        self.update_adaptation_factor(weighted_direction)
 
-        # Choose the most probable direction based on the combined distribution
-        weighted_direction = self.calculate_weighted_direction(combined_distribution)
+        direction = math.pi - weighted_direction * math.pi / 180
+        x_align = (
+            self.position[0] + self.adaptation_factor * np.cos(direction) * self.speed
+        )
+        y_align = (
+            self.position[1] + self.adaptation_factor * np.sin(direction) * self.speed
+        )
 
-        x_align = self.position[0] + 0.08 * np.cos(weighted_direction) * self.speed
-        y_align = self.position[1] + 0.08 * np.sin(weighted_direction) * self.speed
+        if x_align < 0:
+            x_align = 0
+        elif x_align > room_dim[0]:
+            x_align = room_dim[0]
+        if y_align < 0:
+            y_align = 0
+        elif y_align > room_dim[1]:
+            y_align = room_dim[1]
 
         self.position = [x_align, y_align, 0]
+
         self.check_mate(sound_sources)
 
-    def combine_distributions(self, angle_memory: List[List[float]]) -> List[float]:
-        combined = np.mean([np.array(d) for d in angle_memory], axis=0)
-        return combined
+    def calculate_weighted_direction(self) -> float:
+        # Initialize variables to store the sum of weighted probabilities and the total weight for normalization
+        weighted_sum = 0
+        total_weight = 0
 
-    def calculate_weighted_direction(self, combined_distribution: List[float]) -> float:
-        return math.pi - np.argmax(combined_distribution) * math.pi / 180
+        # Iterate over each memory entry
+        for i, memory in enumerate(reversed(self.angle_memory)):
+            decay_factor = self.decay_rate**i
+            # Filter and apply decay to probabilities above the threshold
+            for angle, probability in memory.items():
+                if probability >= 0.08:  # Apply the threshold filter
+                    adjusted_probability = probability * decay_factor
+                    weighted_sum += angle * adjusted_probability
+                    total_weight += adjusted_probability
+
+        # Check for total weight to avoid division by zero
+        if total_weight == 0:
+            return 0  # No valid data to determine direction
+
+        # Calculate the weighted average of the angles
+        return weighted_sum / total_weight
+
+    def update_adaptation_factor(self, weighted_direction):
+        # Adapt based on the direction being positive or negative
+        if weighted_direction > 0:
+            self.adaptation_factor += self.learning_rate
+        else:
+            self.adaptation_factor -= self.learning_rate
+        # Ensure adaptation factor stays within reasonable limits
+        self.adaptation_factor = min(max(self.adaptation_factor, 0.01), 0.1)

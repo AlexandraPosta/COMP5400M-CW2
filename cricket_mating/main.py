@@ -21,12 +21,12 @@ def main():
 
     while i < 1:
         # Agent and Simulation
-        _agent = agent.CricketAgent(agent_location, speed=1.0, available_space=room_dim)
+        _agent = agent.CricketAgentMemory(position=agent_location, available_space=room_dim)
         _environment = environment.CricketEnvironment(room_dim)
         _source = speaker.Speaker(source_loc)
         _environment.add_agent(_agent)
         _environment.add_source(_source)
-        _simulator = simulator.CricketSimulation(_environment, audio_path, output_path)
+        _simulator = simulator.CricketSimulation(_environment, [audio_path], output_path)
         _simulator.play_simulation()
         i += 1
 
