@@ -12,18 +12,7 @@ The rules of the game are as follows:
 
 """
 
-import os
-import sys
-from multiprocessing import Process
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-
-from simulation import CricketSimulation
-from agent import CricketAgent
-from environment import CricketEnvironment
-from speaker import Speaker
+from cricket_lib import agent, environment, simulator, speaker
 
 
 def main():
@@ -38,14 +27,16 @@ def main():
         audio_path = "./sound_data/cricket.wav"
 
         # Agent and Simulation
-        _environment = CricketEnvironment(room_dim)
-        _agent = CricketAgent(agent_location, speed=1.0)
-        _agent_2 = CricketAgent()
+        _environment = environment.CricketEnvironment(room_dim)
+        _agent = agent.CricketAgent()
+        _agent_2 = agent.CricketAgent()
         _environment.add_agent(_agent)
         _environment.add_agent(_agent_2)
-        _source = Speaker(source_loc[0])
+        _source = speaker.Speaker()
         _environment.add_source(_source)
-        simulation = CricketSimulation(_environment, audio_path)
+        simulation = simulator.CricketSimulation(
+            _environment, audio_path, "../cricket_race/"
+        )
         simulation.play_simulation()
 
         # p = Process(target=simulation.play_simulation())
