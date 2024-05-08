@@ -19,6 +19,7 @@ class CricketSimulation:
         Args:
             environment (CricketEnvironment): The environment object
             audio_path (str): The path to the audio file
+            destination_path (str): The path to save output files
         """
 
         self.environment: CricketEnvironment = environment
@@ -31,6 +32,7 @@ class CricketSimulation:
         self.setup_export_paths(destination_path)
         self.signal = None  # To be initialised in play_simulation
         self.trail_patches = []  # List to hold the patches for the trails
+        self.anim = None  # Initialize animation variable
 
     def update(self, _):
         """
@@ -70,12 +72,6 @@ class CricketSimulation:
             self.trail_patches.append(new_patch)
         self.fig.canvas.draw()
 
-    def __animation_finished(self):
-        """
-        Callback function to handle animation finish event
-        """
-        self.anim.event_source.stop()  # Stop animation event source
-
     def play_simulation(self):
         """
         Play the simulation
@@ -88,6 +84,12 @@ class CricketSimulation:
         self.fig.canvas.mpl_connect("close_event", self.__animation_finished)
         plt.show()
 
+    def __animation_finished(self, _):
+        """
+        Callback function to handle animation finish event
+        """
+        if self.anim:
+            self.anim.event_source.stop()  # Stop animation event source
         # Save the png
         print(f"-------------- Saving the png at {self.png_path} --------------")
         self.fig.savefig(self.png_path, dpi=300)
