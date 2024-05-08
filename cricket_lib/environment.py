@@ -1,6 +1,5 @@
 from typing import List
 
-from .agent import CricketAgent
 from .speaker import Speaker
 
 
@@ -15,7 +14,7 @@ class CricketEnvironment:
 
         self.room_dim: List[float] = room_dim
         self.sources: List[Speaker] = []
-        self.agents: List[CricketAgent] = []
+        self.agents = []
 
     def get_room_dimensions(self) -> List[float]:
         """
@@ -27,7 +26,7 @@ class CricketEnvironment:
 
         return self.room_dim
 
-    def add_agent(self, agent: CricketAgent) -> None:
+    def add_agent(self, agent) -> None:
         """
         Add an agent to the environment
 

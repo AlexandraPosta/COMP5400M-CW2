@@ -3,6 +3,7 @@ import sys
 
 from scipy.io import wavfile
 from matplotlib import pyplot as plt, patches
+from matplotlib.lines import Line2D
 from matplotlib.animation import FuncAnimation
 import concurrent.futures
 
@@ -127,6 +128,11 @@ class CricketSimulation:
         for patch in self.trail_patches:
             self.ax.add_patch(patch)
 
+        # Include custom legend
+        legend_elements = [Line2D([0], [0], marker='o', lw=0, color='green', label='Sound Source'),\
+                           Line2D([0], [0], marker='o', lw=0, color='black', label='Cricket')]
+        self.ax.legend(handles=legend_elements, loc='upper left')
+
     def setup_export_paths(self, destination_path: str) -> None:
         """
         Setup the paths for exporting the gif and png files
@@ -135,7 +141,8 @@ class CricketSimulation:
             destination_path (str): The folder to save the files to
 
         The files are named as "output_gif_0.gif", "output_gif_1.gif", etc.
-        or "output_png_0.png", "output_png_1.png", etc. and will be saved in the "output" folder in the parent directory of the current path
+        or "output_png_0.png", "output_png_1.png", etc. and will be saved in 
+        the "output" folder, in the parent directory of the current path
         """
 
         # Get the path of where the execution is happening

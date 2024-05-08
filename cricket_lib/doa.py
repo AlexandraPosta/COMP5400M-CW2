@@ -172,8 +172,7 @@ class DoaCNN(Doa):
         x = self.create_observations(data, self.fs)
 
         # Get the predictions from the model as a list of
-        # probabilities in 10 degrees increments
-        # range from 0 to 180 degrees
+        # possible angles; range from 0 to 180 degrees
         predictions = self.model.predict(x)
         encoder = self.encode()
         y_pred = encoder.inverse_transform(predictions)
