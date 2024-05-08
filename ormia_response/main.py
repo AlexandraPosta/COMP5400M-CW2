@@ -9,11 +9,12 @@ from cricket_lib import agent, environment, simulator, speaker
 
 def main():
     # Room dimensions
-    room_dim = [10., 10.]
-    audio_path = parent_dir + '/sound_data/cricket.wav'
-    output_path = parent_dir + '/ormia_response/data/'
+    room_dim = [10.0, 10.0]
     agent_location = [room_dim[0]/2, 1, 0]
-    source_loc = [[room_dim[0]/2+1, room_dim[1]-1]]
+    source_loc = [room_dim[0]/2+1, room_dim[1]-1]
+
+    audio_path = parent_dir + './sound_data/cricket.wav'
+    output_path = parent_dir + './ormia_response/data/'
 
     # Agent and Simulation
     _agent = agent.CricketAgent(agent_location, speed=1.0, available_space=room_dim)
