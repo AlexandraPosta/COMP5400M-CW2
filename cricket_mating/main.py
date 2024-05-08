@@ -12,7 +12,7 @@ def main():
     # Room dimensions
     room_dim = [10.0, 10.0]
     agent_location = [room_dim[0] / 2, 1, 0]
-    source_loc = [room_dim[0] / 2 + 3, room_dim[1] - 1]
+    source_loc = [room_dim[0] / 2 - 4.5, room_dim[1] - 1.5]
     i = 0
 
     # Simulation variables

@@ -79,11 +79,9 @@ class CricketAgent:
 
         if x_align < 0:
             x_align = 0
-        elif x_align > room_dim[0]:
-            x_align = room_dim[0]
         if y_align < 0:
             y_align = 0
-        elif y_align > room_dim[1]:
+        elif y_align > room_dim[1] - 0.1:
             y_align = room_dim[1]
 
         self.position = [x_align, y_align, 0]
@@ -206,8 +204,6 @@ class CricketAgentMemory(CricketAgent):
 
         if x_align < 0:
             x_align = 0
-        elif x_align > room_dim[0]:
-            x_align = room_dim[0]
         if y_align < 0:
             y_align = 0
         elif y_align > room_dim[1]:
@@ -224,10 +220,10 @@ class CricketAgentMemory(CricketAgent):
 
         # Iterate over each memory entry
         for i, memory in enumerate(reversed(self.angle_memory)):
-            decay_factor = self.decay_rate ** i
+            decay_factor = self.decay_rate ** (i * 2)
             # Filter and apply decay to probabilities above the threshold
             for angle, probability in memory.items():
-                if probability >= 0.08:  # Apply the threshold filter
+                if probability >= 0.09:  # Apply the threshold filter
                     adjusted_probability = probability * decay_factor
                     weighted_sum += angle * adjusted_probability
                     total_weight += adjusted_probability
@@ -246,4 +242,4 @@ class CricketAgentMemory(CricketAgent):
         else:
             self.adaptation_factor -= self.learning_rate
         # Ensure adaptation factor stays within reasonable limits
-        self.adaptation_factor = min(max(self.adaptation_factor, 0.01), 0.1)
+        self.adaptation_factor = min(max(self.adaptation_factor, 0.01), 0.5)
