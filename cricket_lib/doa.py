@@ -13,7 +13,7 @@ from pyroomacoustics.utilities import normalize
 import pyroomacoustics as pra
 from keras.models import load_model
 from sklearn.preprocessing import OneHotEncoder
-from ormia_func import ormia_transformation, ormia_prediction
+#from ormia_func import ormia_transformation, ormia_prediction
 
 
 class Doa:
@@ -238,14 +238,8 @@ class DoaORMIA(Doa):
         """Get the prediction of the sound source direction of arrival of the ORMIA algorithm
         Output is float; predicted angle in degrees from 0 to 180"""
         # Perform the STFT on the signals from the room simulation
-        x = ormia_transformation(self.room.mic_array.signals.T)
-        print("x: ")
-        print(x)
-
-        pred = ormia_prediction(x)
-        print("pred: ")
-        print(pred)
-
+        #x = ormia_transformation(self.room.mic_array.signals.T)
+        #pred = ormia_prediction(x)
         pred=0
 
         # If the prediction is larger than pi, then we need to take the complement

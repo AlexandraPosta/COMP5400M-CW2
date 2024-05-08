@@ -38,11 +38,6 @@ def main():
             _environment, audio_path, "../cricket_race/"
         )
         simulation.play_simulation()
-
-        # p = Process(target=simulation.play_simulation())
-        # p.start()
-        # p.join()
-
         i += 1
 
 

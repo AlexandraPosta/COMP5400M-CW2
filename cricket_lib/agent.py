@@ -2,7 +2,7 @@ import math
 from typing import List
 import numpy as np
 
-from doa import DoaCNN
+from .doa import DoaCNN
 
 
 class CricketAgent:
@@ -11,6 +11,7 @@ class CricketAgent:
         self,
         position: List[float] = None,
         speed: float = 1.0,
+        available_space: List[float] = [10.0, 10.0],
     ):
         """
         Initialize the agent
@@ -20,13 +21,12 @@ class CricketAgent:
             speed (float, optional): The speed of the agent. Defaults to 1.0.
         """
 
-        print("Agent position: ", position)
-
         self.mate: bool = False
         self.auditory_sense: DoaCNN = None
         self.distance_mic: float = 0.1
         self.snr: float = 0.1
         self.speed: float = speed
+        self.available_space: List[float] = available_space
         self.position: List[float] = position if position else self.__random_position()
 
     def sense(
@@ -116,12 +116,12 @@ class CricketAgent:
                 (source[0] - self.position[0]) ** 2
                 + (source[1] - self.position[1]) ** 2
             )
-            if distance < 0.3:
+            if distance < 0.2:
                 self.mate = True
                 return self.mate
 
         # Or if the agent has reached the top of the room
-        if self.position[1] >= 10:
+        if self.position[1] >= self.available_space[0]:
             self.mate = True
             return self.mate
 
@@ -135,24 +135,17 @@ class CricketAgent:
             List[float]: The random position of the agent
         """
 
-        return [np.random.uniform(0.5, 9.5), np.random.uniform(0.5, 20 / 3 - 0.5), 0]
+        return [np.random.uniform(0.5, self.available_space[0]-0.5),
+                np.random.uniform(0.5, self.available_space[1]/2-0.5), 0]
 
 
 class CricketAgentMemory(CricketAgent):
-
     def __init__(
         self,
         memory_size: int = 8,
         position=[np.random.uniform(0.5, 9.5), np.random.uniform(0.5, 20 / 3 - 0.5), 0],
         speed: float = 1.0,
     ):
-        """
-        Initialize the agent with memory
-
-        Args:
-            memory_size (int, optional): The size of the memory. Defaults to 8.
-        """
-
         super().__init__(position=position, speed=speed)
         self.angle_memory: List[List[float]] = (
             []
@@ -162,26 +155,14 @@ class CricketAgentMemory(CricketAgent):
     def move(
         self, room_dim: List[float], sound_sources: List[List[float]], signal: np.array
     ) -> None:
-        """
-        Move the agent towards the sound source using memory
-
-        Args:
-            room_dim (List[float]): The dimensions of the room
-            sound_sources (List[List[float]]): The locations of the sound sources
-            signal (np.array): The audio signal
-        """
-
         if self.mate:
             return
 
-        current_distribution = self.sense(
-            self.position, room_dim, sound_sources, signal
-        )
+        current_distribution = self.sense(self.position, room_dim, sound_sources, signal)
         self.angle_memory.append(current_distribution)
 
         # Maintain memory size
-        if len(self.angle_memory) > self.memory_size:
-            self.angle_memory.pop(0)
+        if len(self.angle_memory) > self.memory_size: self.angle_memory.pop(0)
 
         # Combine distributions from memory to form a single distribution
         combined_distribution = self.combine_distributions(self.angle_memory)
@@ -192,42 +173,12 @@ class CricketAgentMemory(CricketAgent):
         x_align = self.position[0] + 0.08 * np.cos(weighted_direction) * self.speed
         y_align = self.position[1] + 0.08 * np.sin(weighted_direction) * self.speed
 
-        if x_align < 0:
-            x_align = 0
-        elif x_align > room_dim[0]:
-            x_align = room_dim[0]
-        if y_align < 0:
-            y_align = 0
-        elif y_align > room_dim[1]:
-            y_align = room_dim[1]
-
         self.position = [x_align, y_align, 0]
-
         self.check_mate(sound_sources)
 
     def combine_distributions(self, angle_memory: List[List[float]]) -> List[float]:
-        """
-        Combine the angle distributions from memory
-
-        Args:
-            angle_memory (List[List[float]]): The angle distributions from memory
-
-        Returns:
-            List[float]: The combined angle distribution
-        """
-
         combined = np.mean([np.array(d) for d in angle_memory], axis=0)
         return combined
 
     def calculate_weighted_direction(self, combined_distribution: List[float]) -> float:
-        """
-        Calculate the weighted direction based on the combined distribution
-
-        Args:
-            combined_distribution (List[float]): The combined angle distribution
-
-        Returns:
-            float: The weighted direction
-        """
-
         return math.pi - np.argmax(combined_distribution) * math.pi / 180
