@@ -45,7 +45,6 @@ class CricketSimulation:
                 agent.check_mate(self.environment.get_source_locations())
                 for agent in self.environment.agents
             )
-            or self.environment.check_one_agent_under_source()
         ):
             # Close the figure
             plt.close(self.fig)
@@ -94,9 +93,6 @@ class CricketSimulation:
         # Save the png
         print(f"-------------- Saving the png at {self.png_path} --------------")
         self.fig.savefig(self.png_path, dpi=300)
-        # Save the gif
-        print(f"-------------- Saving the gif at {self.gif_path} --------------")
-        self.anim.save(self.gif_path, writer="imagemagick", fps=2)
 
     def setup_room(self):
         """
