@@ -13,7 +13,6 @@ from pyroomacoustics.utilities import normalize
 import pyroomacoustics as pra
 from keras.models import load_model
 from sklearn.preprocessing import OneHotEncoder
-#from ormia_func import ormia_transformation, ormia_prediction
 
 
 class Doa:
