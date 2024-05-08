@@ -53,7 +53,7 @@ class Doa:
             self.room_dimension, fs=self.fs, max_order=3, ray_tracing=True
         )
         for source in self.source_loc:
-            self.room.add_source(source, signal=signal)
+            self.room.add_source(source, signal=signal[self.source_loc.index(source)])
 
         self.microphones = np.c_[
             [self.centre_mic[0] - self.distance_mic, self.centre_mic[1]],

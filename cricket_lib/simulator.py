@@ -5,13 +5,14 @@ from scipy.io import wavfile
 from matplotlib import pyplot as plt, patches
 from matplotlib.animation import FuncAnimation
 import concurrent.futures
+import numpy as np
 
 from .environment import CricketEnvironment
 
 
 class CricketSimulation:
     def __init__(
-        self, environment: CricketEnvironment, audio_path: str, destination_path: str
+        self, environment: CricketEnvironment, audio_paths: str, destination_path: str
     ):
         """
         Initialize the simulation
@@ -22,14 +23,14 @@ class CricketSimulation:
         """
 
         self.environment: CricketEnvironment = environment
-        self.audio_path = audio_path
+        self.audio_paths = audio_paths
         plt.rcParams.update(
             {"figure.figsize": [6, 6], "figure.autolayout": True, "font.size": 12}
         )
         self.fig, self.ax = plt.subplots()
         self.setup_room()
         self.setup_export_paths(destination_path)
-        self.signal = None  # To be initialised in play_simulation
+        self.signal = []  # To be initialised in play_simulation
         self.trail_patches = []  # List to hold the patches for the trails
 
     def update(self, _):
@@ -80,8 +81,9 @@ class CricketSimulation:
         """
         Play the simulation
         """
-
-        fs, self.signal = wavfile.read(self.audio_path)
+        for i in range (0,len(self.audio_paths)):
+            fs, sound_signal = wavfile.read(self.audio_paths[i])
+            self.signal.append(sound_signal)
         self.anim = FuncAnimation(
             self.fig, self.update, frames=None, repeat=False, blit=False
         )
