@@ -1,7 +1,5 @@
 # COMP5400M-CW2
 
-Use a sound source localisation algorithm as a sensory input for bio-inspired agents.
-
 ## Introduction
 
 The purpose of this project is to explore the behaviour of bio-inspired agents when using a sound source localisation algorithm as a sensory input. The agents will be tested in a simulated environment with the aim of finding the best configuration for the agents to be able to locate the sound source.
