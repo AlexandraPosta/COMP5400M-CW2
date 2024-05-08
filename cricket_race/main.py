@@ -12,6 +12,7 @@ The rules of the game are as follows:
 
 """
 
+import numpy as np
 from cricket_lib import agent, environment, simulator, speaker
 
 
@@ -26,14 +27,21 @@ def main():
         # Simulation variables
         audio_path = "./sound_data/cricket.wav"
 
+        random_agent_positions = []
+        for i in range(2):
+            random_agent_positions.append(
+                [
+                    np.random.uniform(0.5, room_dim[0] - 0.5),
+                    np.random.uniform(0.5, room_dim[1] / 2 - 0.5),
+                    0,
+                ]
+            )
+
         # Agent and Simulation
         _environment = environment.CricketEnvironment(room_dim)
-        _agent = agent.CricketAgentEnhanced()
-        _agent_2 = agent.CricketAgentEnhanced()
-        _environment.add_agent(_agent)
-        _environment.add_agent(_agent_2)
-        _source = speaker.Speaker()
-        _environment.add_source(_source)
+        for position in random_agent_positions:
+            _environment.add_agent(agent.CricketAgentWeighted(position))
+        _environment.add_source(speaker.Speaker())
         simulation = simulator.CricketSimulation(
             _environment, [audio_path], "../cricket_race/"
         )

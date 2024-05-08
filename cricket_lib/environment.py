@@ -1,6 +1,7 @@
 from typing import List
 
 from .speaker import Speaker
+from .agent import CricketAgent
 
 
 class CricketEnvironment:
@@ -14,7 +15,7 @@ class CricketEnvironment:
 
         self.room_dim: List[float] = room_dim
         self.sources: List[Speaker] = []
-        self.agents = []
+        self.agents: List[CricketAgent] = []
 
     def get_room_dimensions(self) -> List[float]:
         """
@@ -82,8 +83,7 @@ class CricketEnvironment:
 
         # Check if one agent is under the source
         for agent in self.agents:
-            if (
-                agent.get_position()[0] > lowest_speaker.get_position()[0] - 0.3
-                and agent.get_position()[0] < lowest_speaker.get_position()[0] + 0.3
-            ):
+            if agent.get_position()[1] < lowest_speaker.get_position()[1]:
                 return True
+
+        return False

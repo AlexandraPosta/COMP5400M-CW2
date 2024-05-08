@@ -1,4 +1,5 @@
 import math
+import random
 from typing import List, Tuple
 import numpy as np
 from typing import List, Dict
@@ -30,6 +31,8 @@ class CricketAgent:
         self.speed: float = speed
         self.available_space: List[float] = available_space
         self.position: List[float] = position if position else self.__random_position()
+        self.color: str = "black"
+        self.past_positions: List[List[float]] = []
 
     def sense(
         self,
@@ -88,6 +91,7 @@ class CricketAgent:
             y_align = room_dim[1]
 
         self.position = [x_align, y_align, 0]
+        self.past_positions.append(self.position)
 
         self.check_mate(sound_sources)
 
@@ -144,13 +148,14 @@ class CricketAgent:
         ]
 
 
-class CricketAgentEnhanced(CricketAgent):
+class CricketAgentWeighted(CricketAgent):
     def __init__(
         self,
         position=[np.random.uniform(0.5, 9.5), np.random.uniform(0.5, 20 / 3 - 0.5), 0],
         speed: float = 1.0,
     ):
         super().__init__(position=position, speed=speed)
+        self.color = "red"
 
     def sense(
         self,
@@ -240,7 +245,7 @@ class CricketAgentEnhanced(CricketAgent):
             )
 
             # The weight is the inverse of the distance
-            weight = 1 / distance if distance != 0 else 1
+            weight = 1 / distance**4 if distance != 0 else 1
 
             # The weight is multiplied by the distance
             combined_weight += weight
@@ -269,6 +274,7 @@ class CricketAgentMemory(CricketAgent):
             []
         )  # Storing angle and probabilities
         self.adaptation_factor = 0.01  # Initial adaptation factor
+        self.color = "blue"
 
     def sense(
         self,
@@ -332,6 +338,7 @@ class CricketAgentMemory(CricketAgent):
             y_align = room_dim[1]
 
         self.position = [x_align, y_align, 0]
+        self.past_positions.append(self.position)
 
         self.check_mate(sound_sources)
 

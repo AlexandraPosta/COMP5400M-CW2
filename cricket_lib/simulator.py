@@ -1,19 +1,24 @@
 import os
 import sys
+from typing import List
 
+import numpy as np
 from scipy.io import wavfile
 from matplotlib import pyplot as plt, patches
 from matplotlib.lines import Line2D
 from matplotlib.animation import FuncAnimation
 import concurrent.futures
-import numpy as np
+import imageio
 
 from .environment import CricketEnvironment
 
 
 class CricketSimulation:
     def __init__(
-        self, environment: CricketEnvironment, audio_paths: str, destination_path: str
+        self,
+        environment: CricketEnvironment,
+        audio_paths: List[str],
+        destination_path: str,
     ):
         """
         Initialize the simulation
@@ -47,10 +52,11 @@ class CricketSimulation:
                 agent.check_mate(self.environment.get_source_locations())
                 for agent in self.environment.agents
             )
-            or self.environment.check_one_agent_under_source()
+            or not self.environment.check_one_agent_under_source()
         ):
             # Close the figure
             plt.close(self.fig)
+            self.__animation_finished(None)
             return
 
         sources = self.environment.get_source_locations()
@@ -66,9 +72,11 @@ class CricketSimulation:
             concurrent.futures.wait(futures)
 
         # Draw the new position of the agent
-        for agent in self.environment.get_agent_locations():
+        for agent in self.environment.agents:
             new_patch = patches.Circle(
-                (agent), radius=dimensions[0] / 300, facecolor="black"
+                (agent.get_position()),
+                radius=dimensions[0] / 300,
+                facecolor=agent.color,
             )
             self.ax.add_patch(new_patch)
             self.trail_patches.append(new_patch)
@@ -78,7 +86,7 @@ class CricketSimulation:
         """
         Play the simulation
         """
-        for i in range (0,len(self.audio_paths)):
+        for i in range(0, len(self.audio_paths)):
             fs, sound_signal = wavfile.read(self.audio_paths[i])
             self.signal.append(sound_signal)
         self.anim = FuncAnimation(
@@ -91,14 +99,59 @@ class CricketSimulation:
         """
         Callback function to handle animation finish event
         """
-        if self.anim:
-            self.anim.event_source.stop()  # Stop animation event source
-        # Save the png
-        print(f"-------------- Saving the png at {self.png_path} --------------")
-        self.fig.savefig(self.png_path, dpi=300)
-        # Save the gif
-        print(f"-------------- Saving the gif at {self.gif_path} --------------")
-        self.anim.save(self.gif_path, writer="imagemagick", fps=2)
+        try:
+            plt.close(self.fig)
+            if self.anim:
+                # Kill the animation
+                self.anim.event_source.stop()
+        except Exception as e:
+            pass
+        finally:
+            # Save the png
+            print(f"-------------- Saving the png at {self.png_path} --------------")
+            self.fig.savefig(self.png_path, dpi=300)
+            # Save the gif
+            print(f"-------------- Saving the gif at {self.gif_path} --------------")
+            # self.anim.save(self.gif_path, writer="imagemagick", fps=3)
+            # self.__create_gif()
+
+    def __create_gif(self):
+        """
+        Create the gif
+        """
+        # Create a list to hold frames
+        frames = []
+        num_frames = len(
+            self.environment.agents[0].past_positions
+        )  # Number of frames equals the length of past_positions of any agent
+
+        for i in range(num_frames):
+            # Clear previous frame
+            self.ax.clear()
+
+            # Draw all agents' positions for the current frame
+            for agent in self.environment.agents:
+                position = agent.past_positions[i]
+                new_patch = patches.Circle(
+                    (position[0], position[1]),
+                    radius=self.environment.get_room_dimensions()[0] / 300,
+                    facecolor=agent.color,
+                )
+                self.ax.add_patch(new_patch)
+
+            # Draw additional elements if needed
+            # Add any additional drawing code here
+
+            # Save the current frame as an image
+            self.fig.canvas.draw()
+            width, height = self.fig.get_size_inches() * self.fig.get_dpi()
+            width, height = int(width), int(height)
+            image = np.frombuffer(self.fig.canvas.tostring_rgb(), dtype="uint8")
+            image = image.reshape((height, width, 3))
+            frames.append(image)
+
+        # Save frames as a GIF
+        imageio.mimsave(self.gif_path, frames, format="GIF", duration=0.3)
 
     def setup_room(self):
         """
@@ -125,17 +178,23 @@ class CricketSimulation:
         # Setup agent patches
         self.trail_patches = [
             patches.Circle(
-                position, radius=self.environment.room_dim[0] / 300, facecolor="black"
+                agent.get_position(),
+                radius=self.environment.room_dim[0] / 300,
+                facecolor=agent.color,
             )
-            for position in self.environment.get_agent_locations()
+            for agent in self.environment.agents
         ]
         for patch in self.trail_patches:
             self.ax.add_patch(patch)
 
         # Include custom legend
-        legend_elements = [Line2D([0], [0], marker='o', lw=0, color='green', label='Sound Source'),\
-                           Line2D([0], [0], marker='o', lw=0, color='black', label='Cricket')]
-        self.ax.legend(handles=legend_elements, loc='upper left')
+        legend_elements = [
+            Line2D([0], [0], marker="o", lw=0, color="green", label="Sound Source"),
+            Line2D([0], [0], marker="o", lw=0, color="black", label="Vanilla Cricket"),
+            Line2D([0], [0], marker="o", lw=0, color="red", label="Weighted Cricket"),
+            Line2D([0], [0], marker="o", lw=0, color="blue", label="Memory Cricket"),
+        ]
+        self.ax.legend(handles=legend_elements, loc="upper left")
 
     def setup_export_paths(self, destination_path: str) -> None:
         """
@@ -145,7 +204,7 @@ class CricketSimulation:
             destination_path (str): The folder to save the files to
 
         The files are named as "output_gif_0.gif", "output_gif_1.gif", etc.
-        or "output_png_0.png", "output_png_1.png", etc. and will be saved in 
+        or "output_png_0.png", "output_png_1.png", etc. and will be saved in
         the "output" folder, in the parent directory of the current path
         """
 
