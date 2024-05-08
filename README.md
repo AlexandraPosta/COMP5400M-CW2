@@ -26,6 +26,8 @@ The project is structured as follows:
 
 As this is a project that uses Python, it is recommended to use a virtual environment to run the project. The used version of Python is 3.10.2 and can also be found in the `.python-version` file if using `pyenv`.
 
+We also recommend using a virtual environment manager such as `pyenv` or `virtualenv` to manage the virtual environment.
+
 The required libraries can be found in the `requirements.txt` file. To install the required libraries, run the following command:
 
 ```bash
@@ -41,3 +43,18 @@ As there are 3 different configurations, the script can be run with the followin
 - `mating`: Run the script for a single agent.
 - `race`: Run the script for multiple agents.
 - `ormia`: Run the script for the ormia response.
+
+As an example, to run the script, use the following command:
+
+```bash
+python main.py mating
+```
+
+## Results
+
+The results of the simulation will be displayed live in a matplotlib window. The results will show the agent's position and the sound source's position and how the agent is moving towards the sound source.
+Furthermore, the results will also be saved inside the `output` folder as a `.png` file that will contain the last frame of the simulation.
+
+## Conclusion
+
+The project aims to analyse the agents capacity of locating the sound source. The results will be analysed and discussed in the final report attached to this project.
