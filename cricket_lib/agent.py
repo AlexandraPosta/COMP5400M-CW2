@@ -3,7 +3,7 @@ import numpy as np
 from typing import List, Dict
 from collections import Counter
 
-from .doa import DoaCNN
+from .doa import DoaCNN, DoaMUSIC, DoaORMIA_CNN, DoaORMIA_MUSIC, DoaORMIA
 
 
 class CricketAgent:
