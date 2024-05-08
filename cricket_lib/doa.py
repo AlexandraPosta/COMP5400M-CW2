@@ -8,12 +8,12 @@
 from itertools import combinations
 import math
 import numpy as np
-import statistics
 import pandas as pd
 from pyroomacoustics.utilities import normalize
 import pyroomacoustics as pra
 from keras.models import load_model
 from sklearn.preprocessing import OneHotEncoder
+#from ormia_func import ormia_transformation, ormia_prediction
 
 
 class Doa:
@@ -211,45 +211,6 @@ class DoaMUSIC(Doa):
         doa = pra.doa.MUSIC(self.microphones, self.fs, self.nfft, c=self.c, num_src=1)
         doa.locate_sources(x)
         pred = doa.azimuth_recon
-        print(pred)
-        # If the azimuth is larger than pi, then we need to take the complement
-        if pred > np.pi:
-            pred = 2 * np.pi - pred
-        print(pred)
-        pred = math.degrees(pred)
-
-        # Convert the prediction to degrees
-        return pred
-
-class DoaORMIA_MUSIC(Doa):
-    """Class to predict the doa of the sound source using the MUSIC algorithm
-
-    Performs the sound signal transformation using Short-Time Fourier Transform (STFT)
-    """
-
-    def __init__(
-        self, room_dimensions, source_loc, centre_mic, distance_mic=0.001, snr=0
-    ):
-        super().__init__(room_dimensions, source_loc, centre_mic, distance_mic, snr)
-        self.model_name = "ORMIA_MUSIC"
-
-    def get_prediction(self):
-        """Get the prediction of the sound source direction of arrival of the MUSIC algorithm
-        Output is float; predicted angle in degrees from 0 to 180"""
-        # Perform the STFT on the signals from the room simulation
-
-        
-        ormia_pos = -1*DoaORMIA.ormia_transformation(DoaORMIA, self.room.mic_array.signals.T)
-        x = pra.transform.stft.analysis(
-            ormia_pos[::100], self.nfft, self.nfft // 2
-        )
-        x = x.transpose([2, 1, 0])
-
-        # Construct the new DOA object and perform localisation on the frames in X
-        doa = pra.doa.MUSIC(self.microphones, self.fs/100, self.nfft, c=self.c, num_src=1)
-        
-        doa.locate_sources(x)
-        pred = doa.azimuth_recon
 
         # If the azimuth is larger than pi, then we need to take the complement
         if pred > np.pi:
@@ -266,77 +227,20 @@ class DoaORMIA(Doa):
     """
 
     def __init__(
-        self, room_dimensions, source_loc, centre_mic, distance_mic=0.001, snr=0
+        self, room_dimensions, source_loc, centre_mic, distance_mic=0.1, snr=0
     ):
         super().__init__(room_dimensions, source_loc, centre_mic, distance_mic, snr)
         self.model_name = "ORMIA"
 
-        
-
-    def ormia_transformation(self, f):
-        m = 2.88*(10**(-10)) #kg. effective mass of moving elements
-        k = 0.576 #N/m. End spring constant k1 & k2
-        c = 1.15*(10**(-5)) #Ns/m. Dash-pot damping constant
-        c_3 = 2.88*(10**(-5)) #Ns/m. Dash-pot damping constant
-        k_3 = 5.18 #N/m. Coupling spring constant
-
-        #Initial conditions
-        x1_0 = 0
-        x2_0 = 0
-        x1_dot_0 = 0
-        x2_dot_0 = 0
-
-        M = np.array([[m, 0], [0, m]])
-        C = np.array([[(c + c_3), c_3], [c_3, (c + c_3)]])
-        K = np.array([[(k + k_3), k_3], [k_3, (k + k_3)]])
-        
-        t = np.linspace(0, 89717/1600000, 89717) #100 time steps from 0 to 10 - NEED TO CHECK THIS
-        #sampling frequency is 16000
-        M_inv = np.linalg.inv(M)
-
-        #x_dot_dot = np.dot(M_inv, (f - np.dot(C, x_dot) - np.dot(K, x)))
-        #Initialise arrays to store displacement and velocity
-        x = np.zeros((len(t), 2))
-        x_dot = np.zeros((len(t), 2))
-
-        #Initial conditions
-        x[0] = [x1_0, x2_0]
-        x_dot[0] = [x1_dot_0, x2_dot_0]
-
-        #Time step size
-        dt = (t[1] - t[0])
-
-        #Perform Euler integration
-        for i in range(1, len(t)):
-            x_dot_dot = np.dot(M_inv, (f[i]/10 - np.dot(C, x_dot[i-1]) - np.dot(K, x[i-1])))
-            x_dot[i] = x_dot[i-1] + x_dot_dot * dt
-            x[i] = x[i-1] + x_dot[i] * dt
-
-        return x
-
-    def ormia_prediction(self, x):
-        #Insert code here to use the magnitude difference as a prediction
-        x1 = x[:,0]
-        x2 = x[:,1]
-        x1_mean = statistics.mean(np.absolute(x1))
-        x2_mean = statistics.mean(np.absolute(x2))
-
-        #LIMIT MAX AMPLITUDES
-        if (x1_mean-x2_mean) > 0.7:
-            return 0.7
-        elif (x1_mean-x2_mean) < -0.7:
-            return -0.7
-        else:
-            return (x1_mean-x2_mean)
-
     def get_prediction(self):
+        #NOTE: THIS DOES NOT WORK YET, NEED TO FIX TIME VALUES, DISTANCES, ETC.
 
         """Get the prediction of the sound source direction of arrival of the ORMIA algorithm
         Output is float; predicted angle in degrees from 0 to 180"""
         # Perform the STFT on the signals from the room simulation
-        x = self.ormia_transformation(self.room.mic_array.signals.T)
-        pred = np.pi/2 - self.ormia_prediction(x)
-
+        #x = ormia_transformation(self.room.mic_array.signals.T)
+        #pred = ormia_prediction(x)
+        pred=0
 
         # If the prediction is larger than pi, then we need to take the complement
         if pred > np.pi:
@@ -345,5 +249,3 @@ class DoaORMIA(Doa):
 
         # Convert the prediction to degrees
         return pred
-
-
