@@ -40,10 +40,10 @@ class CricketSimulation:
         source = self.environment.get_source_locations()
         dims = self.environment.get_room_dimensions()
         # Get updates and draw the new positions
-        if (source[0][0]-0.5 < self.agent_location[0] < source[0][0]+0.5 and
-            source[0][1]-0.3 < self.agent_location[1] < source[0][1]+0.5):
+        if (source[0][0]-0.2 < self.agent_location[0] < source[0][0]+0.2 and
+            source[0][1]-0.2 < self.agent_location[1] < source[0][1]+0.2):
             self.agent.mate = True
-        elif (self.agent_location[0] > dims[0]):
+        elif (self.agent_location[1] > dims[1]):
             self.agent.mate = True
         else:
             self.agent_location = self.agent.move(self.agent_location, dims, source, self.signal, 0.1)
