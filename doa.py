@@ -239,7 +239,7 @@ class DoaORMIA_MUSIC(Doa):
         # Perform the STFT on the signals from the room simulation
 
         
-        ormia_pos = DoaORMIA.ormia_transformation(DoaORMIA, self.room.mic_array.signals.T)
+        ormia_pos = -1*DoaORMIA.ormia_transformation(DoaORMIA, self.room.mic_array.signals.T)
         x = pra.transform.stft.analysis(
             ormia_pos[::100], self.nfft, self.nfft // 2
         )
