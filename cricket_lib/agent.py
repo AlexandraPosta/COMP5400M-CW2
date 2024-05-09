@@ -110,7 +110,10 @@ class CricketAgent:
 
         # If the agent is 0.2 units away from any sound source, then the agent has reached the sound source
         for source in sound_sources:
-            if (source[0]-0.2 < self.position[0] < source[0]+0.2 and source[1]-0.2 < self.position[1] < source[1]+0.2):
+            if (
+                source[0] - 0.2 < self.position[0] < source[0] + 0.2
+                and source[1] - 0.2 < self.position[1] < source[1] + 0.2
+            ):
                 self.mate = True
                 return self.mate
 
@@ -232,11 +235,11 @@ class CricketAgentMemory(CricketAgent):
         self.angle_memory.append(current_probabilities)
         self.angle_memory = self.angle_memory[-self.memory_size :]
 
-            # Calculate the new direction with weighted average
-            weighted_direction = self.calculate_weighted_direction()
+        # Calculate the new direction with weighted average
+        weighted_direction = self.calculate_weighted_direction()
 
-            # Update adaptation factor based on recent movement success
-            self.update_adaptation_factor(weighted_direction)
+        # Update adaptation factor based on recent movement success
+        self.update_adaptation_factor(weighted_direction)
 
         direction = math.pi - weighted_direction * math.pi / 180
         x_align = (
