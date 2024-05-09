@@ -2,13 +2,11 @@ import os
 import sys
 from typing import List
 
-import numpy as np
 from scipy.io import wavfile
 from matplotlib import pyplot as plt, patches
 from matplotlib.lines import Line2D
 from matplotlib.animation import FuncAnimation
 import concurrent.futures
-import imageio
 
 from .environment import CricketEnvironment
 
@@ -110,48 +108,6 @@ class CricketSimulation:
             # Save the png
             print(f"-------------- Saving the png at {self.png_path} --------------")
             self.fig.savefig(self.png_path, dpi=300)
-            # Save the gif
-            print(f"-------------- Saving the gif at {self.gif_path} --------------")
-            # self.anim.save(self.gif_path, writer="imagemagick", fps=3)
-            # self.__create_gif()
-
-    def __create_gif(self):
-        """
-        Create the gif
-        """
-        # Create a list to hold frames
-        frames = []
-        num_frames = len(
-            self.environment.agents[0].past_positions
-        )  # Number of frames equals the length of past_positions of any agent
-
-        for i in range(num_frames):
-            # Clear previous frame
-            self.ax.clear()
-
-            # Draw all agents' positions for the current frame
-            for agent in self.environment.agents:
-                position = agent.past_positions[i]
-                new_patch = patches.Circle(
-                    (position[0], position[1]),
-                    radius=self.environment.get_room_dimensions()[0] / 300,
-                    facecolor=agent.color,
-                )
-                self.ax.add_patch(new_patch)
-
-            # Draw additional elements if needed
-            # Add any additional drawing code here
-
-            # Save the current frame as an image
-            self.fig.canvas.draw()
-            width, height = self.fig.get_size_inches() * self.fig.get_dpi()
-            width, height = int(width), int(height)
-            image = np.frombuffer(self.fig.canvas.tostring_rgb(), dtype="uint8")
-            image = image.reshape((height, width, 3))
-            frames.append(image)
-
-        # Save frames as a GIF
-        imageio.mimsave(self.gif_path, frames, format="GIF", duration=0.3)
 
     def setup_room(self):
         """
@@ -191,7 +147,6 @@ class CricketSimulation:
         legend_elements = [
             Line2D([0], [0], marker="o", lw=0, color="green", label="Sound Source"),
             Line2D([0], [0], marker="o", lw=0, color="black", label="Vanilla Cricket"),
-            Line2D([0], [0], marker="o", lw=0, color="red", label="Weighted Cricket"),
             Line2D([0], [0], marker="o", lw=0, color="blue", label="Memory Cricket"),
         ]
         self.ax.legend(handles=legend_elements, loc="upper left")
@@ -203,8 +158,7 @@ class CricketSimulation:
         Args:
             destination_path (str): The folder to save the files to
 
-        The files are named as "output_gif_0.gif", "output_gif_1.gif", etc.
-        or "output_png_0.png", "output_png_1.png", etc. and will be saved in
+        The files are named as "output_png_0.png", "output_png_1.png", etc. and will be saved in
         the "output" folder, in the parent directory of the current path
         """
 
