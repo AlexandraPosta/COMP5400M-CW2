@@ -1,3 +1,8 @@
+"""
+	COMP5400M - CW2
+    Author Name: Alexandre Monk - el19a2m
+"""
+
 from matplotlib import pyplot as plt
 from scipy.integrate import odeint
 import numpy as np

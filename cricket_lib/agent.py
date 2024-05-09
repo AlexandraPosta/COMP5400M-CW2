@@ -1,8 +1,14 @@
+"""
+	COMP5400M - CW2
+    Author Name: Alexandra Posta - el19a2p
+                 Alexandre Monk - el19a2m
+                 Bogdan-Alexandru Ciurea - sc20bac
+"""
+
 import math
 import numpy as np
 from typing import List, Dict
 from collections import Counter
-
 from .doa import DoaCNN, DoaMUSIC, DoaORMIA_CNN, DoaORMIA_MUSIC, DoaORMIA
 
 
@@ -28,7 +34,7 @@ class CricketAgent:
         self.snr: float = 0.1
         self.speed: float = speed
         self.available_space: List[float] = available_space
-        self.position: List[float] = position if position else self.__random_position()
+        self.position: List[float] = position if position else self.random_position()
         self.past_positions: List[List[float]] = [] # Used for visualisation
 
     def sense(
@@ -121,7 +127,7 @@ class CricketAgent:
 
         return self.mate
 
-    def __random_position(self) -> List[float]:
+    def random_position(self) -> List[float]:
         """
         Generate a random position for the agent
 
@@ -176,6 +182,23 @@ class CricketAgentEvolution(CricketAgent):
             )
 
         return 1 / traversed_distance if traversed_distance != 0 else 0
+
+    def evolve(self) -> None:
+        """
+        Evolve the agent
+        
+        Changes just it's speed
+        
+        """
+
+        self.speed += np.random.uniform(-self.mutation_rate, self.mutation_rate)
+
+    def move_to_random_position(self) -> None:
+        """
+        Move the agent to a random position
+        """
+
+        self.position = self.random_position()
 
 
 class CricketAgentMemory(CricketAgent):

@@ -34,6 +34,12 @@ The required libraries can be found in the `requirements.txt` file. To install t
 pip install -r requirements.txt
 ```
 
+**Note**: If you are running the project on a Mac, you will need to install the requirements-mac.txt file. To install the required libraries for a Mac, run the following command:
+
+```bash
+pip install -r requirements-mac.txt
+```
+
 ### Executing the script
 
 The project is setup to be run using the `main.py` file.

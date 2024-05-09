@@ -1,4 +1,8 @@
 """
+
+COMP5400M - CW2
+Author Name: Bogdan-Alexandru Ciurea - sc20bac
+
 This is the main file for the compete agents.
 
 The compete agents are agents that are trained to compete against each other in a game.
@@ -10,34 +14,79 @@ The rules of the game are as follows:
 - Sound sources will be placed randomly on the map but the catch is that the sound source can only be heard by ears which have a certain radius
 - The sound can bang on the walls and the sound will be heard by the ears on the other side of the wall
 
+	
 """
 
+import numpy as np
 from cricket_lib import agent, environment, simulator, speaker
 
 
 def main():
     # Room dimensions
     room_dim = [10.0, 10.0]
-    agent_location = [room_dim[0] / 2, 1, 0]
-    source_loc = [[3, 3]]
+    cricket_number = 4
+    sound_source_number = 2
     i = 0
 
-    while i < 1:
-        # Simulation variables
-        audio_path = "./sound_data/cricket.wav"
+    # Setup the simulation
 
-        # Agent and Simulation
-        _environment = environment.CricketEnvironment(room_dim)
-        _agent_1 = agent.CricketAgent()
-        _agent_2 = agent.CricketAgent()
-        _environment.add_agent(_agent_1)
-        _environment.add_agent(_agent_2)
-        _source = speaker.Speaker()
-        _environment.add_source(_source)
-        simulation = simulator.CricketSimulation(
-            _environment, [audio_path], "../cricket_race/"
+    audio_path = "./sound_data/cricket.wav"
+    audio_paths = [audio_path for i in range(sound_source_number)]
+
+    # Agent and Simulation
+    _environment = environment.CricketEnvironment(room_dim)
+
+    # Add agents to the environment
+    for i in range(cricket_number):
+        _environment.add_agent(
+            agent.CricketAgentEvolution(
+                [
+                    np.random.uniform(0.5, room_dim[0] - 0.5),
+                    np.random.uniform(0.5, room_dim[1] / 2 - 0.5),
+                ]
+            )
         )
-        simulation.play_simulation()
+
+    # Add sound source to the environment
+    for i in range(sound_source_number):
+        _environment.add_source(
+            speaker.Speaker(
+                [
+                    np.random.uniform(0.5, room_dim[0] - 0.5),
+                    np.random.uniform(room_dim[1] * 2 / 3 + 0.5, room_dim[1] - 0.5),
+                ]
+            )
+        )
+
+    simulation = simulator.CricketSimulation(
+        _environment,
+        audio_paths,
+        "../cricket_race/",
+    )
+
+    while i < 5:
+        try:
+            simulation.play_simulation()
+
+            # Find the winner
+            if simulation.environment.has_winner():
+                # Get the winner
+                winner: agent.CricketAgentEvolution = simulation.environment.get_winner()
+                winner.evolve()
+                winner.move_to_random_position()
+                simulation.environment.remove_looser_agents()
+                simulation.environment.add_agent(winner)
+                simulation.reset_environment()
+
+            else :
+                simulation.reset_environment()
+
+        except Exception as e:
+            print(e)
+            simulation.reset_environment()
+
+        # Simulation variables
+
         i += 1
 
 

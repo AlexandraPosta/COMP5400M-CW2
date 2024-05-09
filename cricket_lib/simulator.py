@@ -1,3 +1,10 @@
+"""
+	COMP5400M - CW2
+    Author Name: Alexandra Posta - el19a2p
+                 Alexandre Monk - el19a2m
+                 Bogdan-Alexandru Ciurea - sc20bac
+"""
+
 import os
 import sys
 
@@ -187,3 +194,14 @@ class CricketSimulation:
 
         self.gif_path = os.path.join(parent_path, f"output_gif_{last_number}.gif")
         self.png_path = os.path.join(parent_path, f"output_png_{last_number}.png")
+
+    def reset_environment(self):
+        """
+        Reset the environment
+        """
+
+        self.setup_room()
+        self.signal = []
+        self.trail_patches = []
+        self.anim = None
+        self.environment.scramble_agents()

@@ -1,3 +1,10 @@
+"""
+	COMP5400M - CW2
+    Author Name: Alexandra Posta - el19a2p
+                 Alexandre Monk - el19a2m
+                 Bogdan-Alexandru Ciurea - sc20bac
+"""
+
 import sys
 from cricket_race.main import main as cricket_race_main
 from cricket_mating.main import main as cricket_mating_main

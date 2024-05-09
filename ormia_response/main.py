@@ -1,3 +1,8 @@
+"""
+	COMP5400M - CW2
+    Author Name: Alexandre Monk - el19a2m
+"""
+
 import os
 import sys
 import numpy as np
