@@ -102,7 +102,7 @@ class CricketAgent:
 
         # If the agent is 0.2 units away from any sound source, then the agent has reached the sound source
         for source in sound_sources:
-        if (source[0]-0.2 < self.position[0] < source[0]+0.2 and source[1]-0.2 < self.position[1] < source[1]+0.2):
+            if (source[0]-0.2 < self.position[0] < source[0]+0.2 and source[1]-0.2 < self.position[1] < source[1]+0.2):
                 self.mate = True
                 return self.mate
 
@@ -130,7 +130,6 @@ class CricketAgent:
 
 
 class CricketAgentMemory(CricketAgent):
-
     def __init__(
         self,
         position: List[float] = None,
@@ -147,7 +146,7 @@ class CricketAgentMemory(CricketAgent):
         self.angle_memory: List[Dict[float, float]] = []    # Storing angle and probabilities
         self.adaptation_factor = 0.01                       # Initial adaptation factor
 
-    def sense(
+    def sense_distribution(
         self,
         position: List[float],
         room_dim: List[float],
@@ -179,29 +178,26 @@ class CricketAgentMemory(CricketAgent):
         if self.mate:
             return
 
-        current_probabilities = self.sense(self.position, room_dim, sound_sources, signal)
-        self.angle_memory.append(current_probabilities)
-        self.angle_memory = self.angle_memory[-self.memory_size:]
+        if self.position[1] < room_dim[1]/2:
+            current_probabilities = self.sense_distribution(self.position, room_dim, sound_sources, signal)
+            self.angle_memory.append(current_probabilities)
+            self.angle_memory = self.angle_memory[-self.memory_size:]
 
-        # Calculate the new direction with weighted average
-        weighted_direction = self.calculate_weighted_direction()
+            # Calculate the new direction with weighted average
+            weighted_direction = self.calculate_weighted_direction()
 
-        # Update adaptation factor based on recent movement success
-        self.update_adaptation_factor(weighted_direction)
+            # Update adaptation factor based on recent movement success
+            self.update_adaptation_factor(weighted_direction)
 
-        direction = math.pi - weighted_direction * math.pi / 180
-        x_align = self.position[0] + self.adaptation_factor * np.cos(direction) * self.speed
-        y_align = self.position[1] + self.adaptation_factor * np.sin(direction) * self.speed
-
-        if x_align < 0:
-            x_align = 0
-        if y_align < 0:
-            y_align = 0
-        elif y_align > room_dim[1]:
-            y_align = room_dim[1]
+            direction = math.pi - weighted_direction * math.pi / 180
+            x_align = self.position[0] + self.adaptation_factor * np.cos(direction) * self.speed
+            y_align = self.position[1] + self.adaptation_factor * np.sin(direction) * self.speed
+        else:
+            direction = self.sense(self.position, room_dim, sound_sources, signal)
+            x_align = self.position[0] + 0.08 * np.cos(direction) * self.speed
+            y_align = self.position[1] + 0.08 * np.sin(direction) * self.speed
 
         self.position = [x_align, y_align, 0]
-
         self.check_mate(sound_sources)
 
     def calculate_weighted_direction(self) -> float:
@@ -214,7 +210,7 @@ class CricketAgentMemory(CricketAgent):
             decay_factor = self.decay_rate ** (i * 2)
             # Filter and apply decay to probabilities above the threshold
             for angle, probability in memory.items():
-                if probability >= 0.09:  # Apply the threshold filter
+                if probability >= 0.08:  # Apply the threshold filter
                     adjusted_probability = probability * decay_factor
                     weighted_sum += angle * adjusted_probability
                     total_weight += adjusted_probability
@@ -233,4 +229,4 @@ class CricketAgentMemory(CricketAgent):
         else:
             self.adaptation_factor -= self.learning_rate
         # Ensure adaptation factor stays within reasonable limits
-        self.adaptation_factor = min(max(self.adaptation_factor, 0.01), 0.5)
+        self.adaptation_factor = min(max(self.adaptation_factor, 0.01), 0.2)
