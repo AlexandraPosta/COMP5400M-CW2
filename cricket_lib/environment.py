@@ -6,7 +6,7 @@ from .speaker import Speaker
 class CricketEnvironment:
     def __init__(self, room_dim: List[float]):
         """
-        Initialize the environment
+        Initialise the environment
 
         Args:
             room_dim (List[float]): The dimensions of the room

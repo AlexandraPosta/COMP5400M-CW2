@@ -28,9 +28,9 @@ def main():
 
         # Agent and Simulation
         _environment = environment.CricketEnvironment(room_dim)
-        _agent = agent.CricketAgent()
+        _agent_1 = agent.CricketAgent()
         _agent_2 = agent.CricketAgent()
-        _environment.add_agent(_agent)
+        _environment.add_agent(_agent_1)
         _environment.add_agent(_agent_2)
         _source = speaker.Speaker()
         _environment.add_source(_source)

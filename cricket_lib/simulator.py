@@ -6,21 +6,25 @@ from matplotlib import pyplot as plt, patches
 from matplotlib.lines import Line2D
 from matplotlib.animation import FuncAnimation
 import concurrent.futures
-import numpy as np
+from typing import List
 
 from .environment import CricketEnvironment
 
 
 class CricketSimulation:
     def __init__(
-        self, environment: CricketEnvironment, audio_paths: str, destination_path: str
+        self,
+        environment: CricketEnvironment,
+        audio_paths: List[str],
+        destination_path: str,
     ):
         """
-        Initialize the simulation
+        Initialise the simulation
 
         Args:
             environment (CricketEnvironment): The environment object
             audio_path (str): The path to the audio file
+            destination_path (str): The path to save output files
         """
 
         self.environment: CricketEnvironment = environment
@@ -48,6 +52,7 @@ class CricketSimulation:
         ):
             # Close the figure
             plt.close(self.fig)
+            self.__animation_finished(None)
             return
 
         sources = self.environment.get_source_locations()
@@ -71,11 +76,21 @@ class CricketSimulation:
             self.trail_patches.append(new_patch)
         self.fig.canvas.draw()
 
-    def __animation_finished(self):
+    def __animation_finished(self, _):
         """
         Callback function to handle animation finish event
         """
-        self.anim.event_source.stop()  # Stop animation event source
+        try:
+            plt.close(self.fig)
+            if self.anim:
+                # Kill the animation
+                self.anim.event_source.stop()
+        except Exception as e:
+            pass
+        finally:
+            # Save the png
+            print(f"-------------- Saving the png at {self.png_path} --------------")
+            self.fig.savefig(self.png_path, dpi=300)
 
     def play_simulation(self):
         """
@@ -133,14 +148,14 @@ class CricketSimulation:
 
     def setup_export_paths(self, destination_path: str) -> None:
         """
-        Setup the paths for exporting the gif and png files
+        Setup the paths for exporting the png path files
 
         Args:
             destination_path (str): The folder to save the files to
 
-        The files are named as "output_gif_0.gif", "output_gif_1.gif", etc.
-        or "output_png_0.png", "output_png_1.png", etc. and will be saved in 
-        the "output" folder, in the parent directory of the current path
+        The files are named as "output_png_0.png", "output_png_1.png", 
+        etc. and be saved in the "output" folder, in the parent 
+        directory of the current path
         """
 
         # Get the path of where the execution is happening

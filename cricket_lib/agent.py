@@ -7,6 +7,14 @@ from .doa import DoaCNN, DoaMUSIC, DoaORMIA_CNN, DoaORMIA_MUSIC, DoaORMIA
 
 
 class CricketAgent:
+    """
+        Initialize the insect agent
+
+        Args:
+            position ([position_x: float, position_y: float, position_z: float], optional): The initial position of the agent. Defaults to [np.random.uniform(0, 10), np.random.uniform(0, 10), 0].
+            speed (float, optional): The speed of the agent. Defaults to 1.0.
+            available_space (List[float], optional): The available space in the room. Defaults to [10.0, 10.0].
+    """
 
     def __init__(
         self,
@@ -14,14 +22,6 @@ class CricketAgent:
         speed: float = 1.0,
         available_space: List[float] = [10.0, 10.0],
     ):
-        """
-        Initialize the agent
-
-        Args:
-            position ([position_x: float, position_y: float, position_z: float], optional): The initial position of the agent. Defaults to [np.random.uniform(0, 10), np.random.uniform(0, 10), 0].
-            speed (float, optional): The speed of the agent. Defaults to 1.0.
-        """
-
         self.mate: bool = False
         self.auditory_sense: DoaCNN = None
         self.distance_mic: float = 0.1
@@ -29,6 +29,7 @@ class CricketAgent:
         self.speed: float = speed
         self.available_space: List[float] = available_space
         self.position: List[float] = position if position else self.__random_position()
+        self.past_positions: List[List[float]] = [] # Used for visualisation
 
     def sense(
         self,
@@ -102,7 +103,10 @@ class CricketAgent:
 
         # If the agent is 0.2 units away from any sound source, then the agent has reached the sound source
         for source in sound_sources:
-            if (source[0]-0.2 < self.position[0] < source[0]+0.2 and source[1]-0.2 < self.position[1] < source[1]+0.2):
+            if (
+                source[0]-0.2 < self.position[0] < source[0]+0.2 and 
+                source[1]-0.2 < self.position[1] < source[1]+0.2
+                ):
                 self.mate = True
                 return self.mate
 
@@ -125,11 +129,69 @@ class CricketAgent:
             List[float]: The random position of the agent
         """
 
-        return [np.random.uniform(0.5, self.available_space[0]-0.5),
-                np.random.uniform(0.5, self.available_space[1]/2-0.5), 0]
+        return [
+            np.random.uniform(0.5, self.available_space[0] - 0.5),
+            np.random.uniform(0.5, self.available_space[1] / 2 - 0.5),
+            0,
+        ]
+
+
+class CricketAgentEvolution(CricketAgent):
+    """
+    Initialise the insect agent with evolution
+
+    Args:
+        position ([position_x: float, position_y: float, position_z: float], optional): The initial position of the agent. 
+        Defaults to [np.random.uniform(0, 10), np.random.uniform(0, 10), 0].
+        speed (float, optional): The speed of the agent. Defaults to 1.0.
+        available_space (List[float], optional): The available space in the room. Defaults to [10.0, 10.0].
+        mutation_rate (float, optional): The mutation rate for evolution. Defaults to 0.1.
+    """
+
+    def __init__(
+        self,
+        position: List[float] = None,
+        speed: float = 1.0,
+        available_space: List[float] = [10.0, 10.0],
+        mutation_rate: float = 0.1,
+    ):
+        super().__init__(
+            position=position, speed=speed, available_space=available_space
+        )
+        self.mutation_rate = mutation_rate
+        self.color = "red"
+
+    def get_fitness(self) -> float:
+        """
+        Get the fitness of the agent
+        Returns:
+            float: The fitness of the agent
+        """
+
+        traversed_distance = 0
+        for i in range(1, len(self.past_positions)):
+            traversed_distance += math.sqrt(
+                (self.past_positions[i][0] - self.past_positions[i - 1][0]) ** 2
+                + (self.past_positions[i][1] - self.past_positions[i - 1][1]) ** 2
+            )
+
+        return 1 / traversed_distance if traversed_distance != 0 else 0
 
 
 class CricketAgentMemory(CricketAgent):
+    """
+    Initialise the insect agent with memory
+
+    Args:
+        position ([position_x: float, position_y: float, position_z: float], optional): The initial position of the agent. 
+        Defaults to [np.random.uniform(0, 10), np.random.uniform(0, 10), 0].
+        speed (float, optional): The speed of the agent. Defaults to 1.0.
+        available_space (List[float], optional): The available space in the room. Defaults to [10.0, 10.0].
+        memory_size (int, optional): The size of the memory. Defaults to 10.
+        decay_rate (float, optional): The decay rate for memory. Defaults to 0.9.
+        confidence_rate (float, optional): The confidence rate for adaptation. Defaults to 0.01.
+    """
+
     def __init__(
         self,
         position: List[float] = None,
@@ -137,14 +199,14 @@ class CricketAgentMemory(CricketAgent):
         available_space: List[float] = [10.0, 10.0],
         memory_size: int = 10,
         decay_rate: float = 0.9,
-        learning_rate: float = 0.01,    # Learning rate for adaptation
+        confidence_rate: float = 0.01,    # Confidence for adaptation
     ):
         super().__init__(position=position, speed=speed, available_space=available_space)
         self.memory_size = memory_size
         self.decay_rate = decay_rate
-        self.learning_rate = learning_rate
+        self.confidence_rate = confidence_rate
         self.angle_memory: List[Dict[float, float]] = []    # Storing angle and probabilities
-        self.adaptation_factor = 0.01                       # Initial adaptation factor
+        self.confidence_factor = 0.03                       # Initial adaptation factor
 
     def sense_distribution(
         self,
@@ -153,6 +215,18 @@ class CricketAgentMemory(CricketAgent):
         sound_sources: List[List[float]],
         signal: np.array,
     ) -> float:
+        """
+        Sense the distribution of the sound source
+
+        Args:
+            position ([position_x: float, position_y: float, position_z: float]): The position of the agent
+            room_dim (List[float]): The dimensions of the room
+            sound_sources (List[List[float]]): The locations of the sound sources
+            signal (np.array): The audio signal
+
+        Returns:
+            Probability distrobution as dictionary of {incoming angle: probability of incoming angle}
+        """
 
         self.auditory_sense = DoaCNN(
             room_dim, sound_sources, position, self.distance_mic, self.snr
@@ -174,6 +248,14 @@ class CricketAgentMemory(CricketAgent):
     def move(
         self, room_dim: List[float], sound_sources: List[List[float]], signal: np.array
     ) -> None:
+        """
+            Move the agent towards the sound source using memory
+
+            Args:
+                room_dim (List[float]): The dimensions of the room
+                sound_sources (List[List[float]]): The locations of the sound sources
+                signal (np.array): The audio signal
+        """
             
         if self.mate:
             return
@@ -182,25 +264,28 @@ class CricketAgentMemory(CricketAgent):
             current_probabilities = self.sense_distribution(self.position, room_dim, sound_sources, signal)
             self.angle_memory.append(current_probabilities)
             self.angle_memory = self.angle_memory[-self.memory_size:]
-
             # Calculate the new direction with weighted average
             weighted_direction = self.calculate_weighted_direction()
-
-            # Update adaptation factor based on recent movement success
-            self.update_adaptation_factor(weighted_direction)
-
             direction = math.pi - weighted_direction * math.pi / 180
-            x_align = self.position[0] + self.adaptation_factor * np.cos(direction) * self.speed
-            y_align = self.position[1] + self.adaptation_factor * np.sin(direction) * self.speed
         else:
             direction = self.sense(self.position, room_dim, sound_sources, signal)
-            x_align = self.position[0] + 0.08 * np.cos(direction) * self.speed
-            y_align = self.position[1] + 0.08 * np.sin(direction) * self.speed
 
+        # Update adaptation factor based on recent movement success
+        self.update_confidence_factor(direction)
+        
+        x_align = self.position[0] + self.confidence_factor * np.cos(direction) * self.speed
+        y_align = self.position[1] + self.confidence_factor * np.sin(direction) * self.speed
         self.position = [x_align, y_align, 0]
         self.check_mate(sound_sources)
 
     def calculate_weighted_direction(self) -> float:
+        """
+        Calculate the weighted direction based on the memory
+
+        Returns:
+            float: The weighted direction of arrival of sound
+        """
+
         # Initialize variables to store the sum of weighted probabilities and the total weight for normalization
         weighted_sum = 0
         total_weight = 0
@@ -222,11 +307,18 @@ class CricketAgentMemory(CricketAgent):
         # Calculate the weighted average of the angles
         return weighted_sum / total_weight
     
-    def update_adaptation_factor(self, weighted_direction):
-        # Adapt based on the direction being positive or negative
-        if weighted_direction > 0:
-            self.adaptation_factor += self.learning_rate
-        else:
-            self.adaptation_factor -= self.learning_rate
+    def update_confidence_factor(self, direction):
+        """
+        Update the confidence factor based on the direction of movement. A straight line stimulates the
+        movement or confidence factor, while a sharp turn decreases the confidence factor.
+
+        Args:
+            direction (float): The direction of movement
+        """
+        if 1.4 < direction < 1.75:
+            self.confidence_factor += self.confidence_rate  # Increase if nearly straight ahead
+        elif direction < 0.7 or direction > 2.45:
+            self.confidence_factor -= self.confidence_rate
+
         # Ensure adaptation factor stays within reasonable limits
-        self.adaptation_factor = min(max(self.adaptation_factor, 0.01), 0.2)
+        self.confidence_factor = min(max(self.confidence_factor, 0.03), 0.2)

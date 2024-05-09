@@ -16,7 +16,8 @@ class Speaker:
         Initialize the speaker
 
         Args:
-            position ([position_x: float, position_y: float], optional): The initial position of the speaker. Defaults to [random.uniform(0, 10), random.uniform(0, 10)].
+            position ([position_x: float, position_y: float], optional): The initial position of the speaker. 
+            Defaults to [random.uniform(0, 10), random.uniform(0, 10)].
         """
 
         self.position: List[float] = position
