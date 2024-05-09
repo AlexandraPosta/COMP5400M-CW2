@@ -15,10 +15,12 @@ The project is structured as follows:
 - The main library is in the folder `cricket_lib`. This folder is structured as a library and will be used by all other files.
 - `cricket_mating` contains the code for analysing a single agent and its ability to locate the sound source.
 - `cricket_race` contains the code for analysing multiple agents and their ability to locate the sound source.
-- `ormia_response` contains the code for TODO
+- `ormia_response` contains the code for simulating the response of the ormia to the sound source.
 - All other folders contain resources such as the sound source or the saved models.
 
 ## Running the Project
+
+**Note**: The project is set up to run on a Unix-based system. The project has not been tested on Windows, and it is recommended to run the project on a Unix-based system. This is because the project uses Keras and TensorFlow libraries, which, because of the 2.0 version that we used, is known to have issues on Windows.
 
 ### Libraries and other software
 
