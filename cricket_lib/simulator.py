@@ -147,6 +147,7 @@ class CricketSimulation:
         legend_elements = [
             Line2D([0], [0], marker="o", lw=0, color="green", label="Sound Source"),
             Line2D([0], [0], marker="o", lw=0, color="black", label="Vanilla Cricket"),
+            Line2D([0], [0], marker="o", lw=0, color="red", label="Evolving Cricket"),
             Line2D([0], [0], marker="o", lw=0, color="blue", label="Memory Cricket"),
         ]
         self.ax.legend(handles=legend_elements, loc="upper left")

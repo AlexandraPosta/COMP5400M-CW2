@@ -149,6 +149,21 @@ class CricketAgent:
             0,
         ]
 
+
+class CricketAgentEvolution(CricketAgent):
+    def __init__(
+        self,
+        position: List[float] = None,
+        speed: float = 1.0,
+        available_space: List[float] = [10.0, 10.0],
+        mutation_rate: float = 0.1,
+    ):
+        super().__init__(
+            position=position, speed=speed, available_space=available_space
+        )
+        self.mutation_rate = mutation_rate
+        self.color = "red"
+
     def get_fitness(self) -> float:
         """
         Get the fitness of the agent

@@ -40,7 +40,7 @@ def main():
         # Agent and Simulation
         _environment = environment.CricketEnvironment(room_dim)
         for position in random_agent_positions:
-            _environment.add_agent(agent.CricketAgent(position))
+            _environment.add_agent(agent.CricketAgentEvolution(position))
         _environment.add_source(speaker.Speaker())
         simulation = simulator.CricketSimulation(
             _environment, [audio_path], "../cricket_race/"
