@@ -76,16 +76,7 @@ class CricketAgent:
         direction = self.sense(self.position, room_dim, sound_sources, signal)
         x_align = self.position[0] + 0.08 * np.cos(direction) * self.speed
         y_align = self.position[1] + 0.08 * np.sin(direction) * self.speed
-
-        if x_align < 0:
-            x_align = 0
-        if y_align < 0:
-            y_align = 0
-        elif y_align > room_dim[1] - 0.1:
-            y_align = room_dim[1]
-
         self.position = [x_align, y_align, 0]
-
         self.check_mate(sound_sources)
 
     def get_position(self) -> list:
@@ -109,18 +100,18 @@ class CricketAgent:
             bool: True if the agent has reached the sound source, False otherwise
         """
 
-        # If the agent is 0.3 units away from any sound source, then the agent has reached the sound source
+        # If the agent is 0.2 units away from any sound source, then the agent has reached the sound source
         for source in sound_sources:
-            distance = math.sqrt(
-                (source[0] - self.position[0]) ** 2
-                + (source[1] - self.position[1]) ** 2
-            )
-            if distance < 0.2:
+        if (source[0]-0.2 < self.position[0] < source[0]+0.2 and source[1]-0.2 < self.position[1] < source[1]+0.2):
                 self.mate = True
                 return self.mate
 
         # Or if the agent has reached the top of the room
-        if self.position[1] >= self.available_space[0]:
+        if self.position[0] < 0.1 or self.position[0] > self.available_space[0] - 0.1:
+            self.mate = True
+            return self.mate
+
+        if self.position[1] < 0.1 or self.position[1] > self.available_space[1] - 0.1:
             self.mate = True
             return self.mate
 

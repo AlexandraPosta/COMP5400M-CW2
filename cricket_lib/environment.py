@@ -65,25 +65,3 @@ class CricketEnvironment:
         """
 
         return [source.get_position() for source in self.sources]
-
-    def check_one_agent_under_source(self) -> bool:
-        """
-        Check if one agent is under the source
-
-        Returns:
-            bool: True if one agent is under the source, False otherwise
-        """
-
-        # Find the lowest speaker
-        lowest_speaker = self.sources[0]
-        for source in self.sources:
-            if source.get_position()[1] < lowest_speaker.get_position()[1]:
-                lowest_speaker = source
-
-        # Check if one agent is under the source
-        for agent in self.agents:
-            if (
-                agent.get_position()[0] > lowest_speaker.get_position()[0] - 0.3
-                and agent.get_position()[0] < lowest_speaker.get_position()[0] + 0.3
-            ):
-                return True
